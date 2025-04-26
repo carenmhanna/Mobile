@@ -20,9 +20,6 @@ const NewScreen = () => {
           <Text>Good Morning</Text>
           <View style={styles.profileSection}>
             <Text style={styles.greetingText}>Rafatul Islam</Text>
-            <TouchableOpacity>
-              <Image source={require('./NewScreenPics/profilePicture.png')} />
-            </TouchableOpacity>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -98,9 +95,6 @@ const NewScreen = () => {
           <View style={styles.center}>
             <View style={styles.trendingDealsHeader}>
               <Text style={styles.trendingDealsText}>Trending Deals</Text>
-              <TouchableOpacity style={styles.groupImageContainer}>
-                <Image source={require('./NewScreenPics/Group5.png')} />
-              </TouchableOpacity>
             </View>
             <ScrollView>
               <View style={styles.scroll}>
@@ -185,20 +179,23 @@ const NewScreen = () => {
             </ScrollView>
           </View>
 
-          <View style={styles.moreButtonContainer}>
-            <TouchableOpacity style={styles.btnoir}>
-              <Text style={styles.moreButtonText}>More</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
 
+      <View style={styles.menuItem}>
       <Menu />
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  menuItem: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
   scrollViewContent: {
     paddingBottom: 20,
   },

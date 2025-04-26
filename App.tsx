@@ -14,24 +14,21 @@ import NewScreen from './NewScreen';
 import Categories from './Categories';
 import Order from './Order';
 import Orange from './Orange';
+import SettingsScreen from './SettingsScreen';
+import ChangeNameScreen from './ChangeNameScreen';
+import ChangePasswordScreen from './ChangePasswordScreen';
 import Cart from './Cart';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  useEffect(() => {
-    SplashScreen.preventAutoHideAsync();
-
-    const timer = setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 3000); 
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Order" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Tracking" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+        <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
+        <Stack.Screen name="ChangeNameScreen" component={ChangeNameScreen} />
         <Stack.Screen name="Order" component={Order} />
         <Stack.Screen name="Cart" component={Cart} />
         <Stack.Screen name="Categories" component={Categories} />

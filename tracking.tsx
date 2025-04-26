@@ -106,7 +106,7 @@ const Tracking = () => {
       </TouchableOpacity>
       </View>
 
-      <Menu />
+      
     </SafeAreaView>
   );
 };

@@ -129,7 +129,6 @@ const Orange = () => {
                   </TouchableOpacity>
                 </View>
 
-               <Menu/>
              
           </View>
           

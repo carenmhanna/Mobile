@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -17,9 +17,15 @@ import Button from './Components/Button';
 
 const Review = () => {
   const navigation = useNavigation();
+  const [rating, setRating] = useState(0); // Rating state to keep track of selected rating
+
+  // Function to handle rating selection
+  const handleRating = (selectedRating: number) => {
+    setRating(selectedRating); // Update the rating state
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1,}}>
+    <SafeAreaView style={{ flex: 1,backgroundColor:'white', }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -35,8 +41,23 @@ const Review = () => {
               eiusmod
             </Text>
 
-            <Text style={styles.rating}>5.0</Text>
-            <Image source={require('./ReviewPics/stars.png')} style={styles.stars} />
+            <Text style={styles.rating}>{rating.toFixed(1)}</Text>
+
+            <View style={styles.starsContainer}>
+              {/* Loop through stars and allow interaction */}
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => handleRating(star)}>
+                  <Image
+                    source={
+                      star <= rating
+                        ? require('./ReviewPics/star_filled.png') // Filled star for selected rating
+                        : require('./ReviewPics/star_empty.png') // Empty star for unselected rating
+                    }
+                    style={styles.stars}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={styles.feedbackPrompt}>
               Let us Know what you think
@@ -59,15 +80,15 @@ const Review = () => {
             />
           </View>
 
-          <View style={{justifyContent: 'center', alignItems: 'center'}}>
-           <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('NewScreen' as never)}
-          >
-            <Text style={{color:'black',fontSize:20,marginBottom:5,fontWeight:'bold',textAlign:'center'}}>
-            DONE
-            </Text>
-          </TouchableOpacity>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('NewScreen' as never)}
+            >
+              <Text style={{ color: 'black', fontSize: 20, marginBottom: 5, fontWeight: 'bold', textAlign: 'center' }}>
+                DONE
+              </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -81,7 +102,7 @@ const styles = StyleSheet.create({
     width: '90%',
     borderRadius: 30,
     paddingHorizontal: 90,
-    paddingVertical:20,
+    paddingVertical: 20,
     marginBottom: 10,
     marginTop: 20,
     height: 70,
@@ -112,8 +133,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     textAlign: 'center',
   },
+  starsContainer: {
+    flexDirection: 'row', // Align stars horizontally
+    gap: 10, // Space between the stars
+  },
   stars: {
-    marginLeft: 80,
+    width: 40, // Size of the star
+    height: 40, // Size of the star
   },
   feedbackPrompt: {
     color: 'black',

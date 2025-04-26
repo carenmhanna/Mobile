@@ -44,12 +44,21 @@ const Cart = () => {
 
       </ScrollView>
 
+      <View style={styles.menuItem}>
       <Menu />
+      </View>
+
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  menuItem: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
   container: {
     flex: 1,
   },

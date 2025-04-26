@@ -1,4 +1,4 @@
-import React, { useState,useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -6,265 +6,323 @@ import {
   TouchableOpacity,
   View,
   Image,
-  ScrollView,
   TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-
 const Order = () => {
-
-  const [listv,setlistv]=useState<boolean>(false);
   const navigation = useNavigation();
-  const [checked,setchecked]=useState<boolean>(false);
-  const [text,settext]=useState<string>("Choose your country");
-  function checkb(){
-    if (checked==true){
-      setchecked(false);
-    }
-    else{
-      setchecked(true);
-    }
-  }
-  const [open, setOpen] = useState(false);
-const [value, setValue] = useState(null);
-const [items, setItems] = useState([
-  { label: 'Option 1', value: 'option1' },
-  { label: 'Option 2', value: 'option2' },
-  { label: 'Option 3', value: 'option3' },
-]);
 
-  function touched(){
-    if (listv==true){
-      setlistv(false);
+  const [governateOpen, setGovernateOpen] = useState(false);
+  const [governate, setGovernate] = useState<string | null>('beirut');
+  const [governateItems, setGovernateItems] = useState([
+    { label: 'Beirut', value: 'beirut' },
+    { label: 'Mount Lebanon', value: 'mount_lebanon' },
+    { label: 'North Lebanon', value: 'north_lebanon' },
+    { label: 'South Lebanon', value: 'south_lebanon' },
+    { label: 'Bekaa', value: 'bekaa' },
+    { label: 'Nabatieh', value: 'nabatieh' },
+    { label: 'Baalbek-Hermel', value: 'baalbek_hermel' },
+    { label: 'Akkar', value: 'akkar' },
+    { label: 'Jbeil', value: 'jbeil' },
+    { label: 'Kesserwan', value: 'kesserwan' },
+    { label: 'Zahle', value: 'zahle' },
+  ]);
+
+  const [cityOpen, setCityOpen] = useState(false);
+  const [city, setCity] = useState<string | null>('hamra');
+  const [cityItems, setCityItems] = useState([
+    { label: 'Hamra', value: 'hamra' },
+    { label: 'Achrafieh', value: 'achrafieh' },
+    { label: 'Gemmayzeh', value: 'gemmayzeh' },
+    { label: 'Mar Mikhael', value: 'mar_mikhael' },
+    { label: 'Verdun', value: 'verdun' },
+  ]);
+
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+
+  const [isNextEnabled, setIsNextEnabled] = useState<boolean>(false);  // State to track if the button is enabled
+
+  const handlePhoneNumberChange = (value: string) => {
+    if (value.length <= 8 && /^[0-9]*$/.test(value)) {
+      setPhoneNumber(value);
     }
-    else{
-      setlistv(true);
+  };
+
+  const validateEmail = (value: string) => {
+    setEmail(value);
+  };
+
+  useEffect(() => {
+    switch (governate) {
+      case 'beirut':
+        setCityItems([
+          { label: 'Hamra', value: 'hamra' },
+          { label: 'Achrafieh', value: 'achrafieh' },
+          { label: 'Gemmayzeh', value: 'gemmayzeh' },
+          { label: 'Mar Mikhael', value: 'mar_mikhael' },
+          { label: 'Verdun', value: 'verdun' },
+        ]);
+        setCity('hamra');
+        break;
+      case 'mount_lebanon':
+        setCityItems([
+          { label: 'Jounieh', value: 'jounieh' },
+          { label: 'Ain El Rihaneh', value: 'ain_rihaneh' },
+          { label: 'Jbeil', value: 'jbeil' },
+          { label: 'Baabda', value: 'baabda' },
+          { label: 'Dahieh', value: 'dahieh' },
+        ]);
+        setCity('jounieh');
+        break;
+      case 'north_lebanon':
+        setCityItems([
+          { label: 'Tripoli', value: 'tripoli' },
+          { label: 'Batroun', value: 'batroun' },
+          { label: 'Koura', value: 'koura' },
+          { label: 'Zgharta', value: 'zgharta' },
+          { label: 'Akkar', value: 'akkar' },
+        ]);
+        setCity('tripoli');
+        break;
+      case 'south_lebanon':
+        setCityItems([
+          { label: 'Saida', value: 'saida' },
+          { label: 'Tyr', value: 'tyr' },
+          { label: 'Jezzine', value: 'jezzine' },
+          { label: 'Nabatieh', value: 'nabatieh' },
+          { label: 'Hasbaya', value: 'hasbaya' },
+        ]);
+        setCity('saida');
+        break;
+      case 'bekaa':
+        setCityItems([
+          { label: 'Zahle', value: 'zahle' },
+          { label: 'Baalbek', value: 'baalbek' },
+          { label: 'Hermel', value: 'hermel' },
+          { label: 'Rashaya', value: 'rashaya' },
+          { label: 'Baalbeck', value: 'baalbeck' },
+        ]);
+        setCity('zahle');
+        break;
+      default:
+        setCityItems([]);
+        setCity(null);
+        break;
     }
-    settext('select your country');
-  }
- 
+  }, [governate]);
+
+  // Check if all required fields are filled and phone number is 8 digits
+  useEffect(() => {
+    if (firstName && lastName && email && phoneNumber.length === 8 && governate && city) {
+      setIsNextEnabled(true);
+    } else {
+      setIsNextEnabled(false);
+    }
+  }, [firstName, lastName, email, phoneNumber, governate, city]);
+
   return (
-    <SafeAreaView>
-      <ScrollView>
-      <View style={{flexDirection:'row',gap:100,justifyContent:'flex-start',}}>
-        <View>
-        <TouchableOpacity onPress={()=>{navigation.goBack();}}>
-                <Image source={require('./OrderPics/f2.png')} style={{marginLeft:30,marginTop:30,}}/>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Adjust for iOS
+      >
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 50 }} keyboardShouldPersistTaps="handled">
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.navigate('Cart' as never)} style={{ position: 'absolute', left: 20 }}>
+                <Image source={require('./OrderPics/f2.png')} style={{ width: 24, height: 24 }} />
               </TouchableOpacity>
-        </View>
-      <Text style={{color:'black',fontWeight:'bold',fontSize:25,marginTop:40}}>Checkout</Text>
-      </View>
 
-      <View>
-      <Image source={require('./OrderPics/borderBot.png')} style={{marginLeft:30,marginTop:30,}}/>
-      </View>
-
-      <View style={{backgroundColor:'#F2F2F2',paddingVertical:20,justifyContent:'center',alignItems:'center',marginBottom:20,marginTop:10}}>
-      <Image source={require('./OrderPics/stepper.png')}/>
-      </View>
-
-      <View style={{justifyContent:'center',alignContent:'center',paddingHorizontal:30, marginTop:10}}>
-        <Text style={{color:'black',fontSize:14,marginBottom:5,fontWeight:'bold',}}>
-          Full Name
-        </Text>
-        <View style={styles.input}>
-        <TextInput placeholder="Rafatul Islam" />
-
-        </View>
-      </View>
-
-      <View style={{justifyContent:'center',alignContent:'center',paddingHorizontal:30,marginTop:10}}>
-        <Text style={{color:'black',fontSize:14,marginBottom:5,fontWeight:'bold',}}>
-        Email Address
-        </Text>
-        <View style={styles.input}>
-        <TextInput placeholder='rafatul3588@gmail.com' />
-
-        </View>
-      </View>
-     
-
-      <View style={{justifyContent:'center',alignContent:'center',paddingHorizontal:30,marginTop:10}}>
-        <Text style={{color:'black',fontSize:14,marginBottom:5,fontWeight:'bold',}}>
-          Phone
-        </Text>
-        <View style={styles.input}>
-        <TextInput placeholder="+880 1617202070" />
-
-        </View>
-      </View>
-     
-
-      <View style={{justifyContent:'center',alignContent:'center',paddingHorizontal:30,marginTop:10}}>
-        <Text style={{color:'black',fontSize:14,marginBottom:5,fontWeight:'bold',}}>
-          Address
-        </Text>
-        <View style={styles.input}>
-        <TextInput placeholder="Type your home address" />
-
-        </View>
-      </View>
-
-      <View style={{flexDirection:'row',marginTop:20,}}>
-        <View style={{justifyContent:'center',alignContent:'center',paddingHorizontal:30,marginTop:10}}>
-        <Text style={{color:'black',fontSize:18,marginBottom:5,fontWeight:'bold',}}>
-          Zip Code
-        </Text>
-        <View style={styles.input2}>
-        <TextInput placeholder="Enter here" />
-        </View>
-        </View>
-
-        <View style={{justifyContent:'flex-start',alignContent:'flex-start',marginTop:10}}>
-        <Text style={{color:'black',fontSize:18,marginBottom:5,fontWeight:'bold',}}>
-          City
-        </Text>
-        <View style={styles.input2}>
-        <TextInput placeholder="Enter here" />
-
-        </View>
-        
-        </View>
-      </View>
-
-
-      <View style={{flexDirection:'column',padding:30,}}>
-        <Text style={{color:'black',fontSize:20,marginBottom:5,fontWeight:'bold',}}>Country</Text>
-        <View style={{flexDirection:'row',borderRadius:30,borderWidth:1,padding:10,borderColor:'grey',marginTop:10,}}>
-          <TextInput placeholder={text} />
-          <TouchableOpacity onPress={touched}>
-          <Image source={require('./OrderPics/fle.png')} style={{marginTop:22, position:'absolute',left:150,}}/>
-          </TouchableOpacity>
-
-        </View>
-        {
-          listv===true?
-            <ScrollView style={{flexDirection:'column',borderWidth:1,borderRadius:30,borderColor:'#E67F1E',}} showsVerticalScrollIndicator={true}>
-
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('Canada')}}>
-              <Text>Canada</Text>
-            </TouchableOpacity>
-          
-
-            
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('Lebanon')}}>
-              <Text>Lebanon</Text>
-            </TouchableOpacity>
-
-            
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('France')}}>
-              <Text>France</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('UK')}}>
-              <Text>UK</Text>
-            </TouchableOpacity>
-
-            
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('USA')}}>
-              <Text>USA</Text>
-            </TouchableOpacity>
-
-
-            <TouchableOpacity style={{borderBottomWidth:1,borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}} onPress={()=>{settext('Dubai')}}>
-              <Text>Dubai</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={{borderColor:'grey',paddingVertical:10,paddingHorizontal:140,}}  onPress={()=>{settext('Lebanon')}}>
-              <Text>Lebanon</Text>
-            </TouchableOpacity>
-
-
-
-            </ScrollView>
-          :
-          <View>
+              <Text style={styles.checkoutText}>Checkout</Text>
             </View>
-        }
-        
 
+            <Image source={require('./OrderPics/borderBot.png')} style={styles.borderBot} />
 
-        
-<View style={{ marginTop: 20 }}>
-<Text style={{color:'black',fontSize:20,marginBottom:5,fontWeight:'bold',}}>Country</Text>
-<DropDownPicker
-  open={open}
-  value={value}
-  items={items}
-  setOpen={setOpen}
-  setValue={setValue}
-  setItems={setItems}
-  placeholder="Choose your country"
-  style={{borderRadius:30,marginTop:10,padding:10,}}
-  
-/>
-</View>
+            <View style={styles.stepper}>
+              <Image source={require('./OrderPics/stepper.png')} />
+            </View>
 
-      </View>
+            {/* Form Fields */}
+            <View style={[styles.formField, { marginTop: 20 }]}>
+              <Text style={styles.label}>First Name</Text>
+              <TextInput
+                placeholder="Rafatul"
+                style={styles.textInput}
+                value={firstName}
+                onChangeText={setFirstName}
+              />
+            </View>
 
-     
+            <View style={styles.formField}>
+              <Text style={styles.label}>Last Name</Text>
+              <TextInput
+                placeholder="Islam"
+                style={styles.textInput}
+                value={lastName}
+                onChangeText={setLastName}
+              />
+            </View>
 
-      <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center',gap:10,paddingHorizontal:35,marginTop:20,}}>
-        <TouchableOpacity onPress={checkb}>
-          {
-            checked===false ?
-            <Image source={require('./OrderPics/check.png')}/>
-            :
-            <Image source={require('./OrderPics/ic_check.png')}/>
-          }
-        </TouchableOpacity>
-          <Text style={{color:'black',fontSize:16,marginBottom:5,fontWeight:'bold',}}>Save shipping address</Text>
-      </View>
+            <View style={styles.formField}>
+              <Text style={styles.label}>Email Address</Text>
+              <TextInput
+                placeholder="rafatul3588@gmail.com"
+                value={email}
+                onChangeText={validateEmail}
+                style={styles.textInput}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
+            <View style={styles.formField}>
+              <Text style={styles.label}>Phone</Text>
+              <View style={styles.phoneInput}>
+                <View style={styles.phonePrefix}>
+                  <Text style={{ color: 'black' }}>+961</Text>
+                </View>
+                <TextInput
+                  placeholder="Phone Number"
+                  value={phoneNumber}
+                  keyboardType="numeric"
+                  onChangeText={handlePhoneNumberChange}
+                  style={{ flex: 1, paddingLeft: 10 }}
+                />
+              </View>
+            </View>
 
-      
+            {/* Dropdown for Governate */}
+            <View style={[styles.formField, { zIndex: 2000 }]}>
+              <Text style={styles.label}>Governate</Text>
+              <DropDownPicker
+                open={governateOpen}
+                value={governate}
+                items={governateItems}
+                setOpen={setGovernateOpen}
+                setValue={setGovernate}
+                setItems={setGovernateItems}
+                style={styles.dropdownContainer}
+                dropDownContainerStyle={styles.dropdownList}
+                placeholder="Select a governate"
+                listMode="SCROLLVIEW"
+                dropDownDirection="BOTTOM"
+              />
+            </View>
 
-      <View>
-      <Image source={require('./OrderPics/borderBot.png')} style={{marginLeft:30,marginTop:10,}}/>
-      </View>
+            {/* Dropdown for City */}
+            <View style={[styles.formField, { zIndex: 1000 }]}>
+              <Text style={styles.label}>City</Text>
+              <DropDownPicker
+                open={cityOpen}
+                value={city}
+                items={cityItems}
+                setOpen={setCityOpen}
+                setValue={setCity}
+                setItems={setCityItems}
+                style={styles.dropdownContainer}
+                dropDownContainerStyle={styles.dropdownList}
+                placeholder="Select a city"
+                listMode="SCROLLVIEW"
+                dropDownDirection="BOTTOM"
+              />
+            </View>
 
-      <View style={{justifyContent:'center',alignItems:'center'}}>
-      <TouchableOpacity style={styles.btorange} onPress={()=>{navigation.navigate({
-      key: 'Order2',
-      name: 'Order2',
-    } as never);}}>
-        <Text style={{color:'black',fontSize:20,marginBottom:5,fontWeight:'bold',textAlign:'center'}}>NEXT</Text>
-      </TouchableOpacity>
-      </View>
-     
-      
-      </ScrollView>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              <TouchableOpacity
+                style={[styles.btorange, { opacity: isNextEnabled ? 1 : 0.5 }]}  // Disable button if not valid
+                onPress={() => navigation.navigate({ key: 'Order2', name: 'Order2' } as never)}
+                disabled={!isNextEnabled}  // Disable the button if validation fails
+              >
+                <Text style={styles.nextButtonText}>NEXT</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
-
 };
 
-
 const styles = StyleSheet.create({
-  input:{
-    borderWidth:1,
-    borderRadius:40,
-    borderColor:'grey',
-    padding:10,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
   },
-
-  input2:{
-    borderWidth:1,
-    borderRadius:40,
-    borderColor:'grey',
-    paddingVertical:10,
-    paddingHorizontal:45,
+  checkoutText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  borderBot: {
+    marginTop: 30,
+    marginLeft: 30,
+    marginRight: 30,
+    marginBottom: 30,
+  },
+  stepper: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  formField: {
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+  textInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 10,
+  },
+  phoneInput: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingLeft: 10,
+    height: 40,
+  },
+  phonePrefix: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingLeft: 10,
+  },
+  dropdownContainer: {
+    borderColor: '#ccc',
+    height: 40,
+  },
+  dropdownList: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
   btorange: {
-    backgroundColor: 'orange',
-    width: '90%',
-    borderRadius: 30,
-    padding: 20,
-    marginBottom: 10,
-    marginTop: 30,
-    height: 70,
+    backgroundColor: '#FF6600',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+  },
+  nextButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
