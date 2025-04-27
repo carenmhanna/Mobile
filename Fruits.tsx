@@ -1,32 +1,39 @@
-import React, { useState } from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  Modal,
-  TextInput,
-  ScrollView,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Menu from './Components/Menu';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, TextInput, ScrollView, Image } from 'react-native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import ImageBox from './Components/ImageBox'; // Import the ImageBox component
+
+// Define the navigation types for the stack
+type RootStackParamList = {
+  Orange: { product: any }; // Define the product parameter type for the Orange screen
+};
 
 const Fruits = () => {
-  const navigation = useNavigation();
-  
-  // List of fruits
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
   const fruitsList = [
-    { name: 'Avocado', image: require('./FruitsPics/a1.png') },
-    { name: 'Banana', image: require('./FruitsPics/banana.png') },
-    { name: 'Orange', image: require('./FruitsPics/orange.png') },
-    { name: 'Strawberries', image: require('./FruitsPics/stra.png') },
-    { name: 'Blueberries', image: require('./FruitsPics/o12.png') },
-    { name: 'Apples', image: require('./FruitsPics/pommes.png') },
-    { name: 'Papaya', image: require('./FruitsPics/pp.png') },
-    { name: 'Ananas', image: require('./FruitsPics/ananas.png') },
+    { name: 'Avocado', image: require('./FruitsPics/a1.png'), screen: 'Orange' },
+    { name: 'Banana', image: require('./FruitsPics/banana.png'), screen: 'Orange' },
+    { name: 'Orange', image: require('./FruitsPics/orange.png'), screen: 'Orange' },
+    { name: 'Strawberries', image: require('./FruitsPics/stra.png'), screen: 'Orange' },
+    { name: 'Blueberries', image: require('./FruitsPics/o12.png'), screen: 'Orange' },
+    { name: 'Apples', image: require('./FruitsPics/pommes.png'), screen: 'Orange' },
+    { name: 'Papaya', image: require('./FruitsPics/pp.png'), screen: 'Orange' },
+    { name: 'Ananas', image: require('./FruitsPics/ananas.png'), screen: 'Orange' },
   ];
+
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('http://192.168.1.36:5000/api/products')
+      .then((response) => response.json())
+      .then((data) => {
+        setProducts(data); // Save products from backend
+      })
+      .catch((error) => {
+        console.error('Error fetching products:', error);
+      });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFruits, setFilteredFruits] = useState(fruitsList);
@@ -48,7 +55,7 @@ const Fruits = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FEC54B' }}>
       <View style={{ flex: 1, padding: 10 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.navigate('NewScreen' as never)}>
             <Image
               source={require('./FruitsPics/f1.png')}
               style={{ marginLeft: 25, marginTop: 30 }}
@@ -96,25 +103,37 @@ const Fruits = () => {
                 style={{
                   flex: 1,
                   flexDirection: 'row',
-                  gap: 25,
+                  gap: 15,
                   paddingHorizontal: 5,
                   justifyContent: 'center',
                 }}
               >
-                {/* Left Column */}
                 <View style={{ flexDirection: 'column', gap: 10 }}>
-                  {filteredFruits.slice(0, Math.ceil(filteredFruits.length / 2)).map(fruit => (
-                    <TouchableOpacity key={fruit.name}>
-                      <Image source={fruit.image} />
+                  {products.slice(0, Math.ceil(products.length / 2)).map(product => (
+                    <TouchableOpacity
+                      key={product._id}
+                      onPress={() => navigation.navigate('Orange', { product: product })}
+                    >
+                      <ImageBox
+                        imageSource={{ uri: product.imageUrl }}
+                        textOne={product.name}
+                        textTwo="View Details"
+                      />
                     </TouchableOpacity>
                   ))}
                 </View>
 
-                {/* Right Column */}
                 <View style={{ flexDirection: 'column', gap: 10 }}>
-                  {filteredFruits.slice(Math.ceil(filteredFruits.length / 2)).map(fruit => (
-                    <TouchableOpacity key={fruit.name}>
-                      <Image source={fruit.image} />
+                  {products.slice(Math.ceil(products.length / 2)).map(product => (
+                    <TouchableOpacity
+                      key={product._id}
+                      onPress={() => navigation.navigate('Orange', { product: product })}
+                    >
+                      <ImageBox
+                        imageSource={{ uri: product.imageUrl }}
+                        textOne={product.name}
+                        textTwo="View Details"
+                      />
                     </TouchableOpacity>
                   ))}
                 </View>

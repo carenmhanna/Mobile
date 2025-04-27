@@ -19,7 +19,7 @@ const NewScreen = () => {
         <View style={styles.content}>
           <Text>Good Morning</Text>
           <View style={styles.profileSection}>
-            <Text style={styles.greetingText}>Rafatul Islam</Text>
+            <Text style={styles.greetingText}>Hot Picks</Text>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>

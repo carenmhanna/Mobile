@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as SplashScreen from 'expo-splash-screen';
 import Login from './login';
 import Thanks from './Thanks';
 import Tracking from './tracking';
@@ -19,13 +18,34 @@ import ChangeNameScreen from './ChangeNameScreen';
 import ChangePasswordScreen from './ChangePasswordScreen';
 import Cart from './Cart';
 
-const Stack = createNativeStackNavigator();
+// Define the navigation types for the stack
+type RootStackParamList = {
+  Orange: { product: any }; // Orange screen expects a `product` parameter
+  Order: undefined; // Example for a screen without parameters
+  Order2: undefined; // Example for a screen without parameters
+  Categories: undefined; // Example for a screen without parameters
+  Cart: {item:any}; // Example for a screen without parameters
+  SettingsScreen: undefined; // Example for a screen without parameters
+  ChangeNameScreen: undefined;
+  ChangePasswordScreen: undefined;
+  // Add other screens as needed
+  // For example, you can define more screens as:
+  Login: undefined;
+  Review: undefined;
+  Fruits: undefined;
+  Sign: undefined;
+  NewScreen: undefined;
+  Thanks: undefined;
+  Tracking: undefined;
+  Home: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Tracking" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Thanks" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
         <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
         <Stack.Screen name="ChangeNameScreen" component={ChangeNameScreen} />

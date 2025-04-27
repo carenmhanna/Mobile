@@ -8,12 +8,13 @@ import {
   View,
   Image,
   Modal,
-  ImageBackground,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -38,11 +39,10 @@ const Login = () => {
   useEffect(() => {
     if (isModal2Visible) {
       const timer = setTimeout(() => {
-        setIsModal2Visible(false); 
-        navigation.navigate('NewScreen' as never); 
-      }, 5000); // 5 seconds
-
-      return () => clearTimeout(timer); 
+        setIsModal2Visible(false);
+        navigation.navigate('NewScreen' as never);
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [isModal2Visible, navigation]);
 
@@ -62,10 +62,67 @@ const Login = () => {
     );
   };
 
-  function createAccount() {
-    setIsModalVisible(false); 
-    setIsModal2Visible(true); 
-  }
+  const createAccount = async () => {
+    const { name, familyname, email, password } = formValues;
+
+    const nameRegex = /^[A-Za-z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!nameRegex.test(name)) {
+      alert('Name must be at least 2 letters and contain only alphabetic characters.');
+      return;
+    }
+    if (!nameRegex.test(familyname)) {
+      alert('Family Name must be at least 2 letters and contain only alphabetic characters.');
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (!passwordRegex.test(password)) {
+      alert('Password must be at least 8 characters, include a letter, number and special character.');
+      return;
+    }
+
+    setIsModalVisible(false);
+
+    const API_URL = 'http://192.168.1.36:5000';
+
+    try {
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, familyname, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Account created successfully');
+
+        const userToken = data.token;
+
+        if (userToken) {
+          console.log('Received token:', userToken);
+          await AsyncStorage.setItem('userToken', userToken);
+          console.log('User token saved to AsyncStorage');
+        } else {
+          console.error('User token is missing');
+        }
+
+        setIsModal2Visible(true);
+      } else {
+        alert(data.message || 'Failed to create account');
+        setIsModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error creating account:', error);
+      alert('Failed to connect to server');
+      setIsModalVisible(true);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,6 +164,7 @@ const Login = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Email"
+                value={formValues.email}
                 placeholderTextColor="#E67F1E"
                 onChangeText={t => updateField('email', t)}
               />
@@ -146,12 +204,8 @@ const Login = () => {
         <View style={styles.modalBackground2}>
           <View style={styles.modalContainer2}>
             <Text style={styles.txt2}>Welcome</Text>
-            <Text style={styles.txt2}>{formValues.name} ! </Text>
-
-            <Image
-              source={require('./LoginPics/congrats.jpg')}
-              resizeMode="contain"
-            />
+            <Text style={styles.txt2}>{formValues.name}!</Text>
+            <Image source={require('./LoginPics/congrats.jpg')} resizeMode="contain" />
           </View>
         </View>
       </Modal>
@@ -159,20 +213,10 @@ const Login = () => {
   );
 };
 
-
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  imtop: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'cover',
-  },
-  t1: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 25,
-  },
+  imtop: { height: '100%', width: '100%', resizeMode: 'cover' },
+  t1: { color: 'black', fontWeight: 'bold', fontSize: 25 },
   input: {
     borderWidth: 2,
     borderRadius: 30,
@@ -209,10 +253,7 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 20,
   },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
+  modalBackground: { flex: 1, justifyContent: 'flex-end' },
   modalContainer: {
     backgroundColor: 'white',
     justifyContent: 'center',
@@ -245,11 +286,6 @@ const styles = StyleSheet.create({
     color: '#E67F1E',
     textAlign: 'center',
     marginBottom: 10,
-  },
-  nameText: {
-    color: 'black',
-    fontSize: 20,
-    textAlign: 'center',
   },
 });
 

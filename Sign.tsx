@@ -15,22 +15,59 @@ import {
   Easing,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Sign = () => {
-  const [isModalVisible, setIsModalVisible] = useState(true); // Show modal for debug
+  const [isModalVisible, setIsModalVisible] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(0));
   const navigation = useNavigation();
   const [passv, setpassv] = useState(true);
   const [pass, setpass] = useState('');
   const [email, setemail] = useState('');
 
+  const API_URL = 'http://192.168.1.36:5000'; 
+
   const checkButtonStatus = (): boolean => email === '' || pass === '';
 
   const fpass = () => setpassv(prev => !prev);
 
+  const handleLogin = async () => {
+    if (checkButtonStatus()) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password: pass }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await AsyncStorage.setItem('userToken', data.token);
+        console.log('Login successful');
+        setIsModalVisible(false); // CLOSE THE MODAL FIRST
+        navigation.navigate({
+          key: 'NewScreen',
+          name: 'NewScreen',
+        } as never);
+      } else {
+        alert(data.message || 'Login failed');
+      }
+      
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('Failed to connect to server');
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.log('Showing modal');
       setIsModalVisible(true);
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -60,17 +97,14 @@ const Sign = () => {
             <View style={styles.modalContainer}>
               <View style={styles.modalHeader}>
                 <Text style={styles.t1}>Sign In</Text>
-                <TouchableOpacity  
-                onPress={() => {
-                  setIsModalVisible(false); 
-                  setTimeout(() => {
-                    navigation.navigate({
-                      name: 'Home',
-                      key: 'Home',
-                    } as never);
-                  }, 300); 
-                }}
-  >
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsModalVisible(false);
+                    setTimeout(() => {
+                      navigation.navigate('Home' as never);
+                    }, 300);
+                  }}
+                >
                   <Image
                     source={require('./SignPics/ic_close.png')}
                     style={{ width: 20, height: 20, marginTop: 10 }}
@@ -106,20 +140,16 @@ const Sign = () => {
                 <Text style={styles.forgot}>Forgot Password?</Text>
               </TouchableOpacity>
 
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                         <TouchableOpacity
-                          style={styles.button}
-                          onPress={() => {
-                            setIsModalVisible(false);
-                            navigation.navigate('NewScreen' as never);
-                          }}
-                          
-                        >
-                          <Text style={{color:'black',fontSize:20,marginBottom:5,fontWeight:'bold',textAlign:'center'}}>
-                          DONE
-                          </Text>
-                        </TouchableOpacity>
-                        </View> 
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleLogin}
+                >
+                  <Text style={styles.btnText}>
+                    DONE
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </KeyboardAvoidingView>
         </Animated.View>
@@ -134,7 +164,7 @@ const styles = StyleSheet.create({
     width: '90%',
     borderRadius: 30,
     paddingHorizontal: 90,
-    paddingVertical:20,
+    paddingVertical: 20,
     marginBottom: 10,
     marginTop: 20,
     height: 70,
@@ -196,18 +226,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
-  btorange: {
-    backgroundColor: 'orange',
-    width: '100%',
-    borderRadius: 30,
-    paddingVertical: 20,
-    height: 70,
-    justifyContent: 'center',
-  },
   btnText: {
     textAlign: 'center',
     color: 'black',
     fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
 });
 

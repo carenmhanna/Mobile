@@ -45,22 +45,10 @@ const Order = () => {
     { label: 'Verdun', value: 'verdun' },
   ]);
 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
+  const [street, setStreet] = useState<string>(''); // New state for the street input
+  const [isNextEnabled, setIsNextEnabled] = useState<boolean>(false);
 
-  const [isNextEnabled, setIsNextEnabled] = useState<boolean>(false);  // State to track if the button is enabled
 
-  const handlePhoneNumberChange = (value: string) => {
-    if (value.length <= 8 && /^[0-9]*$/.test(value)) {
-      setPhoneNumber(value);
-    }
-  };
-
-  const validateEmail = (value: string) => {
-    setEmail(value);
-  };
 
   useEffect(() => {
     switch (governate) {
@@ -121,20 +109,19 @@ const Order = () => {
     }
   }, [governate]);
 
-  // Check if all required fields are filled and phone number is 8 digits
   useEffect(() => {
-    if (firstName && lastName && email && phoneNumber.length === 8 && governate && city) {
+    if (governate && city && street) {
       setIsNextEnabled(true);
     } else {
       setIsNextEnabled(false);
     }
-  }, [firstName, lastName, email, phoneNumber, governate, city]);
+  }, [governate, city, street]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Adjust for iOS
+        style={{ flex: 1 ,backgroundColor:'white'}}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <ScrollView contentContainerStyle={{ paddingBottom: 50 }} keyboardShouldPersistTaps="handled">
@@ -152,96 +139,57 @@ const Order = () => {
               <Image source={require('./OrderPics/stepper.png')} />
             </View>
 
-            {/* Form Fields */}
-            <View style={[styles.formField, { marginTop: 20 }]}>
-              <Text style={styles.label}>First Name</Text>
-              <TextInput
-                placeholder="Rafatul"
-                style={styles.textInput}
-                value={firstName}
-                onChangeText={setFirstName}
-              />
-            </View>
+            <View style={{ justifyContent: 'center', alignItems: 'center',marginTop:100, }}>
+              <View style={[styles.formField, { zIndex: 2000 }]}>
+                <Text style={styles.label}>Governate</Text>
+                <DropDownPicker
+                  open={governateOpen}
+                  value={governate}
+                  items={governateItems}
+                  setOpen={setGovernateOpen}
+                  setValue={setGovernate}
+                  setItems={setGovernateItems}
+                  style={styles.dropdownContainer}
+                  dropDownContainerStyle={styles.dropdownList}
+                  placeholder="Select a governate"
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="BOTTOM"
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <Text style={styles.label}>Last Name</Text>
-              <TextInput
-                placeholder="Islam"
-                style={styles.textInput}
-                value={lastName}
-                onChangeText={setLastName}
-              />
-            </View>
+              <View style={[styles.formField, { zIndex: 1000 }]}>
+                <Text style={styles.label}>City</Text>
+                <DropDownPicker
+                  open={cityOpen}
+                  value={city}
+                  items={cityItems}
+                  setOpen={setCityOpen}
+                  setValue={setCity}
+                  setItems={setCityItems}
+                  style={styles.dropdownContainer}
+                  dropDownContainerStyle={styles.dropdownList}
+                  placeholder="Select a city"
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="BOTTOM"
+                />
+              </View>
 
-            <View style={styles.formField}>
-              <Text style={styles.label}>Email Address</Text>
-              <TextInput
-                placeholder="rafatul3588@gmail.com"
-                value={email}
-                onChangeText={validateEmail}
-                style={styles.textInput}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.formField}>
-              <Text style={styles.label}>Phone</Text>
-              <View style={styles.phoneInput}>
-                <View style={styles.phonePrefix}>
-                  <Text style={{ color: 'black' }}>+961</Text>
-                </View>
+              <View style={[styles.formField, { zIndex: 500 }]}>
+                <Text style={styles.label}>Street</Text>
                 <TextInput
-                  placeholder="Phone Number"
-                  value={phoneNumber}
-                  keyboardType="numeric"
-                  onChangeText={handlePhoneNumberChange}
-                  style={{ flex: 1, paddingLeft: 10 }}
+                  style={styles.textInput}
+                  placeholder="Enter street"
+                  value={street}
+                  onChangeText={setStreet}
                 />
               </View>
             </View>
 
-            {/* Dropdown for Governate */}
-            <View style={[styles.formField, { zIndex: 2000 }]}>
-              <Text style={styles.label}>Governate</Text>
-              <DropDownPicker
-                open={governateOpen}
-                value={governate}
-                items={governateItems}
-                setOpen={setGovernateOpen}
-                setValue={setGovernate}
-                setItems={setGovernateItems}
-                style={styles.dropdownContainer}
-                dropDownContainerStyle={styles.dropdownList}
-                placeholder="Select a governate"
-                listMode="SCROLLVIEW"
-                dropDownDirection="BOTTOM"
-              />
-            </View>
-
-            {/* Dropdown for City */}
-            <View style={[styles.formField, { zIndex: 1000 }]}>
-              <Text style={styles.label}>City</Text>
-              <DropDownPicker
-                open={cityOpen}
-                value={city}
-                items={cityItems}
-                setOpen={setCityOpen}
-                setValue={setCity}
-                setItems={setCityItems}
-                style={styles.dropdownContainer}
-                dropDownContainerStyle={styles.dropdownList}
-                placeholder="Select a city"
-                listMode="SCROLLVIEW"
-                dropDownDirection="BOTTOM"
-              />
-            </View>
-
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
               <TouchableOpacity
-                style={[styles.btorange, { opacity: isNextEnabled ? 1 : 0.5 }]}  // Disable button if not valid
+                style={[styles.btorange, { opacity: isNextEnabled ? 1 : 0.5 }]}
                 onPress={() => navigation.navigate({ key: 'Order2', name: 'Order2' } as never)}
-                disabled={!isNextEnabled}  // Disable the button if validation fails
+                disabled={!isNextEnabled}
               >
                 <Text style={styles.nextButtonText}>NEXT</Text>
               </TouchableOpacity>
@@ -278,6 +226,7 @@ const styles = StyleSheet.create({
   formField: {
     marginBottom: 20,
     paddingHorizontal: 20,
+    width: '90%',  // Ensure inputs have space on either side
   },
   label: {
     fontSize: 16,
@@ -289,19 +238,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
-    paddingLeft: 10,
-  },
-  phoneInput: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingLeft: 10,
-    height: 40,
-  },
-  phonePrefix: {
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingLeft: 10,
   },
   dropdownContainer: {

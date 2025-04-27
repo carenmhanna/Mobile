@@ -8,166 +8,220 @@ import {
   Image,
   ScrollView,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 const Order2 = () => {
   const navigation = useNavigation();
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Canada', value: 'canada' },
-    { label: 'Lebanon', value: 'lebanon' },
-    { label: 'France', value: 'france' },
-    { label: 'UK', value: 'uk' },
-    { label: 'USA', value: 'usa' },
-    { label: 'Dubai', value: 'dubai' },
-  ]);
-
-  const [text, setText] = useState<string>('Choose your country');
-  const [listv, setListv] = useState<boolean>(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [monthYear, setMonthYear] = useState('');
+  const [cardHolderName, setCardHolderName] = useState('');
+  const [selectedPayment, setSelectedPayment] = useState<'cash' | 'card' | 'whish'>('cash');
   const [checked, setChecked] = useState<boolean>(false);
-
-  const toggleList = () => {
-    setListv(!listv);
-    setText('Select your country');
-  };
 
   const handleCheck = () => {
     setChecked(!checked);
   };
 
-  const [selectedPayment, setSelectedPayment] = useState<'cash' | 'card' | 'credit'>('cash');
+  // Validate Month/Year format (MM/YY)
+  const validateMonthYear = (input: string) => {
+    const regex = /^(0[1-9]|1[0-2])\/\d{2}$/; // Format MM/YY
+    return regex.test(input);
+  };
+
+  // Check if all fields are valid
+  const isFormValid = () => {
+    return (
+      selectedPayment=='cash'
+      ||
+      (cardNumber.length === 16 &&
+      cvv.length === 4 &&
+      !isNaN(Number(cardNumber)) &&
+      !isNaN(Number(cvv)) &&
+      validateMonthYear(monthYear) &&
+      cardHolderName.trim() !== '')
+    );
+  };
+
+  const handleConfirmOrder = () => {
+    // Check if fields are filled
+    if (selectedPayment=='cash'){
+      navigation.navigate({ key: 'Thanks', name: 'Thanks' } as never);
+    }
+    else{
+    if (!cardHolderName.trim()) {
+      Alert.alert('Missing Information', 'Please enter your card holder name.');
+      return;
+    }
+    if (cardNumber.length !== 16 || isNaN(Number(cardNumber))) {
+      Alert.alert('Invalid Card Number', 'Please enter a valid 16-digit card number.');
+      return;
+    }
+    if (cvv.length !== 4 || isNaN(Number(cvv))) {
+      Alert.alert('Invalid CVV', 'Please enter a valid 3 or 4-digit CVV.');
+      return;
+    }
+    if (!validateMonthYear(monthYear)) {
+      Alert.alert('Invalid Expiry Date', 'Please enter a valid expiry date in MM/YY format.');
+      return;
+    }
+    if (checked) {
+      Alert.alert('Agreement Required', 'Please confirm that you want to save your card details.');
+      return;
+    }
+
+    if (!isFormValid()) {
+      Alert.alert('Invalid Input', 'Please ensure all fields are filled correctly and contain valid numbers.');
+    } else {
+      navigation.navigate({ key: 'Thanks', name: 'Thanks' } as never);
+    }
+  }
+  };
+
+  // Calculate the expected delivery date
+  const expectedDays = 5; // Expected delivery in 5 days
+  const currentDate = new Date();
+  const expectedDeliveryDate = new Date(currentDate);
+  expectedDeliveryDate.setDate(currentDate.getDate() + expectedDays);
+  const formattedDeliveryDate = expectedDeliveryDate.toLocaleDateString();
 
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <View style={{ flexDirection: 'row', gap: 100, justifyContent: 'flex-start' }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image source={require('./Order2Pics/f2.png')} style={{ marginLeft: 30, marginTop: 30 }} />
-          </TouchableOpacity>
-          <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 25, marginTop: 40 }}>Checkout</Text>
-        </View>
-
-        <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 30 }} />
-
-        <View style={{ backgroundColor: 'white', paddingVertical: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-          <Image source={require('./Order2Pics/ss.png')} />
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 20, paddingLeft: 10 }}>
-            <TouchableOpacity onPress={() => setSelectedPayment('cash')}>
-              <View style={[styles.paymentOption, selectedPayment === 'cash' && styles.selected]}>
-                <Text style={styles.paymentText}>Cash On Delivery</Text>
-              </View>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <SafeAreaView>
+        <ScrollView>
+          <View style={{ flexDirection: 'row', gap: 100, justifyContent: 'flex-start' }}>
+            <TouchableOpacity onPress={() => navigation.navigate({ key: 'Order', name: 'Order' } as never)}>
+              <Image source={require('./Order2Pics/f2.png')} style={{ marginLeft: 30, marginTop: 30 }} />
             </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setSelectedPayment('card')}>
-              <View style={[styles.paymentOption, selectedPayment === 'card' && styles.selected]}>
-                <Text style={styles.paymentText}>Credit Card</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setSelectedPayment('credit')}>
-              <View style={[styles.paymentOption, selectedPayment === 'credit' && styles.selected]}>
-                <Text style={styles.paymentText}>Credit</Text>
-              </View>
-            </TouchableOpacity>
+            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 25, marginTop: 40 }}>Checkout</Text>
           </View>
-        </ScrollView>
 
-        <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+          <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 30 }} />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', marginTop: 10 }}>
-            <Image source={require('./Order2Pics/Creditcard.png')} style={{ marginLeft: 30, marginTop: 20 }} />
-            <Image source={require('./Order2Pics/c22.png')} style={{ marginLeft: 30, marginTop: 20 }} />
-            <Image source={require('./Order2Pics/Creditcard.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+          <View style={{ backgroundColor: 'white', paddingVertical: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+            <Image source={require('./Order2Pics/ss.png')} />
           </View>
-        </ScrollView>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Card Holder Name</Text>
-          <View style={styles.input}><TextInput placeholder='Md Rafatul islam' /></View>
-        </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: 'row', gap: 20, paddingLeft: 10 }}>
+              <TouchableOpacity onPress={() => setSelectedPayment('cash')}>
+                <View style={[styles.paymentOption, selectedPayment === 'cash' && styles.selected]}>
+                  <Text style={styles.paymentText}>Cash On Delivery</Text>
+                </View>
+              </TouchableOpacity>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Card Number</Text>
-          <View style={styles.input}><TextInput placeholder='333 4444 5555 6666' /></View>
-        </View>
+              <TouchableOpacity onPress={() => setSelectedPayment('card')}>
+                <View style={[styles.paymentOption, selectedPayment === 'card' && styles.selected]}>
+                  <Text style={styles.paymentText}>Credit Card</Text>
+                </View>
+              </TouchableOpacity>
 
-        <View style={{ flexDirection: 'row', marginTop: 20 }}>
-          <View style={[styles.inputContainer, { marginRight: 10 }]}>
-            <Text style={styles.label}>Month/Year</Text>
-            <View style={styles.input2}><TextInput placeholder="Enter here" /></View>
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>CVV</Text>
-            <View style={styles.input2}><TextInput placeholder="Enter here" /></View>
-          </View>
-        </View>
+              <TouchableOpacity onPress={() => setSelectedPayment('whish')}>
+                <View style={[styles.paymentOption, selectedPayment === 'whish' && styles.selected]}>
+                  <Text style={styles.paymentText}>Whish</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
 
-        <View style={{ paddingHorizontal: 30, marginTop: 20 }}>
-          <Text style={styles.label}>Country</Text>
-          <View style={styles.countryInput}>
-            <TextInput placeholder={text} />
-            <TouchableOpacity onPress={toggleList}>
-              <Image source={require('./Order2Pics/fle.png')} style={styles.dropdownArrow} />
-            </TouchableOpacity>
-          </View>
-          {listv && (
-            <ScrollView style={styles.countryList} showsVerticalScrollIndicator>
-              {items.map((item) => (
-                <TouchableOpacity
-                  key={item.value}
-                  style={styles.countryOption}
-                  onPress={() => { setText(item.label); setListv(false); }}
-                >
-                  <Text>{item.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+          <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+
+          {selectedPayment === 'cash' && (
+            <View style={styles.deliveryInfo}>
+              <Text style={styles.text}>Expected delivery in {expectedDays} days</Text>
+              <Text style={styles.date}>{formattedDeliveryDate}</Text>
+              <Image source={require('./Order2Pics/deliveryTruck.avif')} style={styles.image} />
+            </View>
           )}
-        </View>
 
-        <View style={{ marginTop: 20, paddingHorizontal: 30 }}>
-          <Text style={styles.label}>Country</Text>
-          <DropDownPicker
-            open={open}
-            value={value}
-            items={items}
-            setOpen={setOpen}
-            setValue={setValue}
-            setItems={setItems}
-            placeholder="Choose your country"
-            style={{ borderRadius: 30, marginTop: 10, padding: 10 }}
-          />
-        </View>
+          {/* Hide all the content below the truck image when 'cash' is selected */}
+          {selectedPayment !== 'cash' && (
+            <>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                  <Image source={require('./Order2Pics/Creditcard.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+                  <Image source={require('./Order2Pics/c22.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+                  <Image source={require('./Order2Pics/Creditcard.png')} style={{ marginLeft: 30, marginTop: 20 }} />
+                </View>
+              </ScrollView>
 
-        <View style={styles.saveCheckbox}>
-          <TouchableOpacity onPress={handleCheck}>
-            <Image source={checked ? require('./Order2Pics/ic_check.png') : require('./Order2Pics/check.png')} />
-          </TouchableOpacity>
-          <Text style={styles.label}>Save credit card details</Text>
-        </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Card Holder Name</Text>
+                <View style={styles.input}>
+                  <TextInput
+                    placeholder='Md Rafatul Islam'
+                    value={cardHolderName}
+                    onChangeText={setCardHolderName}
+                  />
+                </View>
+              </View>
 
-        <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 10 }} />
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Card Number</Text>
+                <View style={styles.input}>
+                  <TextInput
+                    placeholder='3334 4444 5555 6666'
+                    keyboardType="numeric"
+                    maxLength={16}
+                    value={cardNumber}
+                    onChangeText={setCardNumber}
+                  />
+                </View>
+              </View>
 
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <TouchableOpacity
-            style={styles.btorange}
-            onPress={() => {
-              navigation.navigate({ key: 'Thanks', name: 'Thanks' } as never);
-            }}
-          >
-            <Text style={styles.confirmText}>CONFIRM ORDER</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+              <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'center', gap: 50 }}>
+                <View>
+                  <Text style={styles.label}>Month/Year</Text>
+                  <View style={styles.input2}>
+                    <TextInput
+                      placeholder="MM/YY"
+                      maxLength={5}
+                      value={monthYear}
+                      onChangeText={setMonthYear}
+                    />
+                  </View>
+                </View>
+                <View>
+                  <Text style={styles.label}>CVV</Text>
+                  <View style={styles.input2}>
+                    <TextInput
+                      placeholder="CVV"
+                      keyboardType="numeric"
+                      maxLength={4}
+                      value={cvv}
+                      onChangeText={setCvv}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.saveCheckbox}>
+                <TouchableOpacity onPress={handleCheck}>
+                  <Image source={checked ? require('./Order2Pics/ic_check.png') : require('./Order2Pics/check.png')} />
+                </TouchableOpacity>
+                <Text style={styles.label}>Save credit card details</Text>
+              </View>
+
+              <Image source={require('./Order2Pics/borderBot.png')} style={{ marginLeft: 30, marginTop: 10 }} />
+            </>
+          )}
+
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity
+              style={[styles.btorange, { backgroundColor: isFormValid() ? '#FEC54B' : '#EAEAEA' }]} // Change button color if form is not valid
+              onPress={handleConfirmOrder}
+            >
+              <Text style={styles.confirmText}>CONFIRM ORDER</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -201,7 +255,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   btorange: {
-    backgroundColor: '#FEC54B',
     width: '90%',
     borderRadius: 30,
     padding: 20,
@@ -218,51 +271,41 @@ const styles = StyleSheet.create({
   paymentOption: {
     borderWidth: 3,
     borderColor: '#FEC54B',
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 10,
+    width: 150,
+    backgroundColor: 'transparent',
   },
   selected: {
     backgroundColor: '#FEC54B',
   },
   paymentText: {
     color: 'black',
-    fontWeight: 'bold',
-    fontSize: 20,
-  },
-  countryInput: {
-    flexDirection: 'row',
-    borderRadius: 30,
-    borderWidth: 1,
-    padding: 10,
-    borderColor: 'grey',
-    marginTop: 10,
-  },
-  dropdownArrow: {
-    marginTop: 22,
-    position: 'absolute',
-    left: 150,
-  },
-  countryList: {
-    flexDirection: 'column',
-    borderWidth: 1,
-    borderRadius: 30,
-    borderColor: '#E67F1E',
-    marginTop: 10,
-  },
-  countryOption: {
-    borderBottomWidth: 1,
-    borderColor: 'grey',
-    paddingVertical: 10,
-    paddingHorizontal: 140,
+    textAlign: 'center',
   },
   saveCheckbox: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    marginTop: 10,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 35,
+  },
+  deliveryInfo: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  date: {
+    fontSize: 18,
+    color: 'gray',
+    marginTop: 5,
+  },
+  image: {
+    width: 100,
+    height: 100,
     marginTop: 20,
   },
 });
